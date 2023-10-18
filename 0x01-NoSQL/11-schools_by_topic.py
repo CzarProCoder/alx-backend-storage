@@ -13,4 +13,4 @@ def schools_by_topic(mongo_collection, topic):
         mongo_collection: Collection containing the documents to check
         topic: Topic to be evaluated
     '''
-    return mongo_collection.find({"topic": topic})
+    return mongo_collection.find({"topics": topic})
