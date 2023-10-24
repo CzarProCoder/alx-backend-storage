@@ -91,3 +91,24 @@ class Cache:
         Method to get a number
         '''
         return int.from_bytes(self, sys.byteorder)
+
+
+def replay(method: Callable, cache: Cache):
+    '''
+    Function to display the history of calls of a particular function
+    '''
+    method_name = method.__name__
+    key_inputs = f"{method_name}:inputs"
+    key_outputs = f"{method_name}:outputs"
+
+    inputs = cache._redis.lrange(key_inputs, 0, -1)
+    outputs = cache._redis.lrange(key_outputs, 0, -1)
+
+    if not inputs or not outputs:
+        print(f"{method_name} was never called.")
+        return
+
+    print(f"{method_name} was called {len(inputs)} times:")
+    for input_data, output_key in zip(inputs, outputs):
+        output_key = output_key.decode('utf-8')
+        print(f"{method_name}(*{input_data.decode('utf-8')}) -> {output_key}")
