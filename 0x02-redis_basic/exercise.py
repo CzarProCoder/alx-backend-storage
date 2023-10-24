@@ -93,10 +93,7 @@ class Cache:
         return int.from_bytes(self, sys.byteorder)
 
 
-def replay(method: Callable, cache: Cache):
-    '''
-    Function to display the history of calls of a particular function
-    '''
+def replay(method: Callable):
     method_name = method.__name__
     key_inputs = f"{method_name}:inputs"
     key_outputs = f"{method_name}:outputs"
@@ -112,3 +109,11 @@ def replay(method: Callable, cache: Cache):
     for input_data, output_key in zip(inputs, outputs):
         output_key = output_key.decode('utf-8')
         print(f"{method_name}(*{input_data.decode('utf-8')}) -> {output_key}")
+        print(f"{method_name}(*{input_data.decode('utf-8')}) -> {output_key}")
+
+
+# cache = Cache()
+# cache.store("foo")
+# cache.store("bar")
+# cache.store(42)
+# replay(cache.store)
