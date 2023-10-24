@@ -92,14 +92,20 @@ class Cache:
         '''
         return int.from_bytes(self, sys.byteorder)
 
+global_cache = None  # A global variable to store the Cache instance
 
 def replay(method: Callable):
+    global global_cache
     method_name = method.__name__
     key_inputs = f"{method_name}:inputs"
     key_outputs = f"{method_name}:outputs"
 
-    inputs = cache._redis.lrange(key_inputs, 0, -1)
-    outputs = cache._redis.lrange(key_outputs, 0, -1)
+    if global_cache is None:
+        print(f"{method_name} was never called.")
+        return
+
+    inputs = global_cache._redis.lrange(key_inputs, 0, -1)
+    outputs = global_cache._redis.lrange(key_outputs, 0, -1)
 
     if not inputs or not outputs:
         print(f"{method_name} was never called.")
@@ -107,13 +113,13 @@ def replay(method: Callable):
 
     print(f"{method_name} was called {len(inputs)} times:")
     for input_data, output_key in zip(inputs, outputs):
+        input_str = ", ".join(input_data.decode('utf-8').split(", "))
         output_key = output_key.decode('utf-8')
-        print(f"{method_name}(*{input_data.decode('utf-8')}) -> {output_key}")
-        print(f"{method_name}(*{input_data.decode('utf-8')}) -> {output_key}")
+        print(f"{method_name}(*({input_str},)) -> {output_key}")
 
 
-# cache = Cache()
-# cache.store("foo")
-# cache.store("bar")
-# cache.store(42)
-# replay(cache.store)
+cache = Cache()
+cache.store("foo")
+cache.store("bar")
+cache.store(42)
+replay(cache.store)
